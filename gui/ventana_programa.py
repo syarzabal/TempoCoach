@@ -16,15 +16,15 @@ class VentanaPrograma(tk.Tk):
         self.title("Ventana Principal")
         self.geometry("500x300")
 
-        self.container = tk.Frame(self)
-        self.container.pack(side="top", fill="both", expand=True)
+        self.frame_container = tk.Frame(self, bg="black")
+        self.frame_container.pack(side="top", fill="both", expand=True)
 
         # Diccionario para almacenar las pantallas
         self.frames = {}
 
         # Crear las pantallas y guardarlas con nombre
         for clase, nombre in pantallas:
-            frame = clase(self.container, self)
+            frame = clase(parent_widget=self.frame_container, controller=self)
             self.frames[nombre] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 

@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 class PantallaAjustes(tk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
+    def __init__(self, parent_widget, controller):
+        super().__init__(parent_widget)
         self.controller = controller
 
         label = ttk.Label(self, text="Pantalla de Ajustes", font=("Segoe UI", 16))
