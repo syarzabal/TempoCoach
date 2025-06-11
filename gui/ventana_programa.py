@@ -26,7 +26,7 @@ class VentanaPrograma(tk.Tk):
         for clase, nombre in pantallas:
             frame = clase(parent_widget=self.frame_container, controller=self)
             self.frames[nombre] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+            frame.place(in_=self.frame_container, x=0, y=0, relwidth=1, relheight=1)
 
         self.mostrar_pantalla("PantallaInicio")
 

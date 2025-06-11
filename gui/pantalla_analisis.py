@@ -6,7 +6,7 @@ class PantallaAnalisis(tk.Frame):
         super().__init__(parent_widget)
         self.controller = controller
 
-        label = ttk.Label(self, text="Pantalla de Análisis", font=("Segoe UI", 16))
+        label = ttk.Label(self, text="Pantalla de Análisis", font=("Segoe UI", 16), background="orange")
         label.pack(pady=20)
 
         btn_volver = ttk.Button(self, text="Volver al inicio",
