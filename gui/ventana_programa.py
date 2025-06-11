@@ -1,13 +1,13 @@
 import tkinter as tk
 from gui.pantalla_inicio import PantallaInicio
-from gui.pantalla_analisis import PantallaAnalisis
-from gui.pantalla_ajustes import PantallaAjustes
+from gui.pantalla_analisis_en_directo import PantallaAnalisisDirecto
+from gui.pantalla_analisis_archivo import PantallaAnalisisArchivo
 
 # Lista de pantallas (clase, "nombre")
 pantallas = [
     (PantallaInicio, "PantallaInicio"),
-    (PantallaAnalisis, "PantallaAnalisis"),
-    (PantallaAjustes, "PantallaAjustes")
+    (PantallaAnalisisDirecto, "PantallaAnalisisDirecto"),
+    (PantallaAnalisisArchivo, "PantallaAnalisisArchivo")
 ]
 
 class VentanaPrograma(tk.Tk):
@@ -16,7 +16,7 @@ class VentanaPrograma(tk.Tk):
         self.title("Ventana Principal")
         self.geometry("500x300")
 
-        self.frame_container = tk.Frame(self, bg="black")
+        self.frame_container = tk.Frame(self, bg="grey")
         self.frame_container.pack(side="top", fill="both", expand=True)
 
         # Diccionario para almacenar las pantallas

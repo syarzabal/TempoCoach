@@ -9,10 +9,10 @@ class PantallaInicio(tk.Frame):
         label = ttk.Label(self, text="Pantalla de Inicio", font=("Segoe UI", 16), background="red")
         label.pack(pady=20)
 
-        btn_analisis = ttk.Button(self, text="Ir a análisis",
-                                  command=lambda: controller.mostrar_pantalla("PantallaAnalisis"))
+        btn_analisis = ttk.Button(self, text="Ver tempo en directo",
+                                  command=lambda: controller.mostrar_pantalla("PantallaAnalisisDirecto"))
         btn_analisis.pack(pady=10)
 
-        btn_ajustes = ttk.Button(self, text="Ir a ajustes",
-                                 command=lambda: controller.mostrar_pantalla("PantallaAjustes"))
+        btn_ajustes = ttk.Button(self, text="Analizar desde un archivo",
+                                 command=lambda: controller.mostrar_pantalla("PantallaAnalisisArchivo"))
         btn_ajustes.pack(pady=10)
