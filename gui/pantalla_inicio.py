@@ -6,7 +6,7 @@ class PantallaInicio(tk.Frame):
         super().__init__(parent_widget)
         self.controller = controller
 
-        label = ttk.Label(self, text="Pantalla de Inicio", font=("Segoe UI", 16), background="red")
+        label = ttk.Label(self, text="Pantalla de Inicio", font=("Segoe UI", 16))
         label.pack(pady=20)
 
         btn_analisis = ttk.Button(self, text="Ver tempo en directo",

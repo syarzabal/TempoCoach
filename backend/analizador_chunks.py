@@ -13,5 +13,6 @@ class AnalizadorChunks:
         tempo = librosa.feature.tempo(y=audio_chunk, sr=sample_rate) # TODO: start_bpm, std_bpm, max_tempo
         return float(tempo[0])
 
+    # TODO: borrar esta función
     def testConexion(self) -> str:
         return "Conexión establecida"

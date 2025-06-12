@@ -13,7 +13,7 @@ pantallas = [
 class VentanaPrograma(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Ventana Principal")
+        self.title("Tempo Coach")
         self.geometry("500x300")
 
         self.frame_container = tk.Frame(self, bg="grey")

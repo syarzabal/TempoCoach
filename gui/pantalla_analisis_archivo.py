@@ -6,9 +6,9 @@ class PantallaAnalisisArchivo(tk.Frame):
         super().__init__(parent_widget)
         self.controller = controller
 
+        self.btn_volver = ttk.Button(self, text="⬅",
+                                     command=lambda: controller.mostrar_pantalla("PantallaInicio"))
+        self.btn_volver.place(x=5, y=5)
+
         label = ttk.Label(self, text="Analizar desde archivo", font=("Segoe UI", 16))
         label.pack(pady=20)
-
-        btn_volver = ttk.Button(self, text="Volver al inicio",
-                                command=lambda: controller.mostrar_pantalla("PantallaInicio"))
-        btn_volver.pack()
