@@ -14,7 +14,7 @@ class VentanaPrograma(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Tempo Coach")
-        self.geometry("500x300")
+        self.geometry("800x500")
 
         self.frame_container = tk.Frame(self, bg="grey")
         self.frame_container.pack(side="top", fill="both", expand=True)
