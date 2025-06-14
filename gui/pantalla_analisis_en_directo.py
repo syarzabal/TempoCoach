@@ -1,112 +1,92 @@
 import tkinter as tk
-from tkinter import ttk, Widget
+from tkinter import ttk
 from backend.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
 import threading
-from text_handler import TextHandler
 import tkinter.scrolledtext as ScrolledText
 import logging
-import time
+from text_handler import TextHandler
+
 
 class PantallaAnalisisDirecto(tk.Frame):
+    DURACION_CHUNK = 4  # en segundos
+    SAMPLE_RATE = 44100
+
     def __init__(self, parent_widget, controller):
         super().__init__(parent_widget)
         self.controller = controller
+        self.running = False
+        self.thread = None
+        self.analizador = AnalizadorChunks()
 
-        self.duracion_chunk = 4 # Duracion en segundos de un chunk de audio
-        self.sample_rate = 44100
-        self.AnalizadorChunks = AnalizadorChunks()
+        self._crear_widgets()
+        self._configurar_logging()
 
-        self.btn_volver = ttk.Button(self, text="⬅",
-                                     command=lambda: controller.mostrar_pantalla("PantallaInicio"))
-        self.btn_volver.place(x=5, y=5)
+    def _crear_widgets(self):
+        ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
 
-        # TODO: borrar este componente
-        # self.label_test_conexion = ttk.Label(self, text="Conexion NO establecida", foreground="gray")
-        # self.label_test_conexion.config(text=self.AnalizadorChunks.testConexion())
-        # self.label_test_conexion.pack(pady=5)
-
-        self.label_title = ttk.Label(self, text="Calcular tempo en directo", font=("Segoe UI", 16), background="yellow")
-        self.label_title.pack(pady=5)
+        ttk.Label(self, text="Calcular tempo en directo", font=("Segoe UI", 16)).pack(pady=15)
 
         self.frame_container = tk.Frame(self, bg="grey", height=200)
         self.frame_container.pack(side="top", fill="x", expand=True, padx=5, pady=5)
 
-        # Add text widget to display logging info
-        st = ScrolledText.ScrolledText(self.frame_container, state='disabled', height=15)
-        st.configure(font='TkFixedFont')
-        st.pack(side="bottom", fill="x")
+        self.text_display = ScrolledText.ScrolledText(self.frame_container, state='disabled', height=15, font=('Helvetica', 18))
+        self.text_display.pack(side="bottom", fill="x")
 
-        # Create textLogger
-        text_handler = TextHandler(st)
-
-        # Logging configuration
-        logging.basicConfig(filename='test.log',
-                            level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
-
-        # Add the handler to logger
-        logger = logging.getLogger()
-        logger.addHandler(text_handler)
-
-        # self.btn_grabar = ttk.Button(self, text="Grabar",
-        #                              command=lambda: threading.Thread(target=self.grabar,
-        #                                                               args=(self.duracion_chunk, self.sample_rate),
-        #                                                               daemon=True).start())
-        # self.btn_grabar.pack(pady=20)
-
-        self.label_status = tk.Label(self, text="Status: detenido", font=("Segoe UI", 10), background="yellow")
+        self.label_status = tk.Label(self, text="Status: detenido", font=("Segoe UI", 10))
         self.label_status.pack(pady=5)
 
-        self.running: bool = False
-        self.thread = None
-        self.btn_grabar = ttk.Button(self, text="Grabar",
-                                     command=self.toggle_thread)
+        self.btn_grabar = ttk.Button(self, text="Grabar", command=self._toggle_worker)
         self.btn_grabar.pack(pady=5)
 
+    def _configurar_logging(self):
+        text_handler = TextHandler(self.text_display)
+        logging.basicConfig(filename='test.log',
+                            filemode='w',
+                            level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.getLogger().addHandler(text_handler)
 
-    def toggle_thread(self):
+    def _toggle_worker(self):
+        self.running = not self.running
+        self.btn_grabar.config(text="Detener" if self.running else "Grabar")
+
         if self.running:
-            self.running = False
-            self.btn_grabar.config(text="Iniciar")
-            self.actualizar_label_status("Status: deteniendo...")
+            threading.Thread(target=self._procesar_audio_loop, daemon=True).start()
         else:
-            self.running = True
-            self.btn_grabar.config(text="Detener")
-            self.thread = threading.Thread(target=self.worker)
-            self.thread.start()
+            self._actualizar_label_status("Status: deteniendo...")
 
-    def actualizar_label_status(self, texto):
+    def _actualizar_label_status(self, texto):
         self.label_status.after(0, lambda: self.label_status.config(text=texto))
 
-    def worker(self):
-        d = self.duracion_chunk
-        sr = self.sample_rate
+    def _grabar_audio(self):
+        self._actualizar_label_status("Status: grabando...")
+        audio = sd.rec(int(self.DURACION_CHUNK * self.SAMPLE_RATE),
+                       samplerate=self.SAMPLE_RATE,
+                       channels=1,
+                       dtype='float32')
+        sd.wait()
+        return audio.flatten()
 
+    def _procesar_audio(self, audio):
+        self._actualizar_label_status("Status: analizando tempo...")
+        tempo = self.analizador.getTempo(audio_chunk=audio, sample_rate=self.SAMPLE_RATE)
+        display_text = f'[{tempo:.1f} BPM] \t\t [{self._formatear_tempo(tempo)}]'
+        logging.info(display_text)
+
+    def _procesar_audio_loop(self):
         while self.running:
+            audio = self._grabar_audio()
+            self._procesar_audio(audio)
+        self._actualizar_label_status("Status: detenido")
 
-            print('Comenzando grabación')
-            self.actualizar_label_status("Status: grabando...")
-
-            audio = sd.rec(
-                int(d * sr),
-                samplerate=sr,
-                channels=1,
-                dtype='float32'
-            )
-            sd.wait()
-            audio = audio.flatten()
-
-            # tempo = self.AnalizadorChunks.getTempo(audio, sr)
-            # self.actualizar_display(f"Tempo estimado: {tempo:.2f} BPM")
-            print('Grabación finalizada')
-            print('Analizando tempo')
-            self.actualizar_label_status("Status: analizando tempo...")
-            tempo = self.AnalizadorChunks.getTempo(audio_chunk=audio, sample_rate=sr)
-
-            msg = f'Tempo estimado: {tempo:.2f} BPM'
-            print(msg)
-            logging.info(msg)
-
-        if not self.running:
-            self.actualizar_label_status("Status: detenido")
+    def _formatear_tempo(self, tempo):
+        escala = ""
+        for i in range(60, 201):
+            if i == int(tempo):
+                escala += "!"
+            elif i % 20 == 0:
+                escala += ":"
+            else:
+                escala += "."
+        return escala
