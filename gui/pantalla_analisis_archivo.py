@@ -45,7 +45,7 @@ class PantallaAnalisisArchivo(tk.Frame):
         print("Plots generados")
 
     def _cargar_imagenes(self, path) -> None:
-        # self.img = tk.PhotoImage(file="assets/images/output.png")
+        # self.img = tk.PhotoImage(file="assets/images/output.png")o
         # tk.Label(self, image=self.img).pack()
         self.img_stempo = None
         self.img_dtempo = None

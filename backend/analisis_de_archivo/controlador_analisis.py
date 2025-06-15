@@ -32,6 +32,6 @@ class ControladorAnalisis:
         # Generar y guardar los gráficos
         self.plotter.plot_audio(y=y, sr=sr)
         self.plotter.plot_dynamic_tempo(dynamic_tempo=dynamic_tempo)
-        self.plotter.plot_rw_beats(beats=beats, onset_env=onset_env, peaks=peaks)
+        self.plotter.plot_rw_beats(beats=beats, onset_env=onset_env)
         self.plotter.plot_peaks(y=y, sr=sr, peaks=peaks)
         self.plotter.plot_peak_spacing(peak_spacing=peak_intervals, stempo=stempo)

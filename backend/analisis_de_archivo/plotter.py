@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-import librosa
+from scipy.signal import find_peaks
 
 
 class Plotter:
@@ -42,13 +42,17 @@ class Plotter:
         plt.savefig(ruta)
         plt.close()
 
-    def plot_rw_beats(self, beats, onset_env, peaks):
+    # TODO: reemplazar eje-X por tiempo
+    def plot_rw_beats(self, beats, onset_env):
         tolerancia_frames = 1
+        umbral=0.5
+        onset_peaks, _ = find_peaks(onset_env, height=umbral)
+
         plt.figure(figsize=(12, 5))
         plt.plot(onset_env, label='Onset strength', color='blue', lw=2.5)
 
         for beat in beats:
-            if np.any(np.abs(peaks - beat) <= tolerancia_frames):
+            if np.any(np.abs(onset_peaks - beat) <= tolerancia_frames):
                 color = 'green'  # Alineado
             else:
                 color = 'red'  # Desalineado
