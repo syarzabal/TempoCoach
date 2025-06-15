@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from backend.analisis_de_archivo.controlador_analisis import ControladorAnalisis
+import os
 
 
 class PantallaAnalisisArchivo(tk.Frame):
@@ -26,6 +27,7 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.label_archivo_seleccionado.pack(pady=5)
 
         self.btn_analizar = None
+        self.controlador_analisis = None
 
 
     def _seleccionar_archivo(self):
@@ -43,12 +45,38 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
         self.controlador_analisis.generar_plots()
         print("Plots generados")
+        self._cargar_imagenes()
 
-    def _cargar_imagenes(self, path) -> None:
-        # self.img = tk.PhotoImage(file="assets/images/output.png")o
-        # tk.Label(self, image=self.img).pack()
-        self.img_stempo = None
-        self.img_dtempo = None
-        self.img_beats = None
-        self.img_peaks = None
-        self.img_peak_spacing = None
+    def _cargar_imagenes(self) -> None:
+        if self.controlador_analisis is None:
+            return
+
+        # Container scrolleable
+        canvas = tk.Canvas(self, height=400)  # Puedes ajustar la altura
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        scroll_frame = ttk.Frame(canvas)
+
+        scroll_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        dir_salida = self.controlador_analisis.get_directorio_salida()
+
+        self.img_dtempo = tk.PhotoImage(file=os.path.join(dir_salida, "dynamic_tempo.png"))
+        self.img_beats = tk.PhotoImage(file=os.path.join(dir_salida, "beats_vs_onsets.png"))
+        self.img_peaks = tk.PhotoImage(file=os.path.join(dir_salida, "audio_peaks.png"))
+        self.img_peak_spacing = tk.PhotoImage(file=os.path.join(dir_salida, "peak_spacing.png"))
+
+        ttk.Label(scroll_frame, image=self.img_dtempo).pack(pady=5)
+        ttk.Label(scroll_frame, image=self.img_beats).pack(pady=5)
+        ttk.Label(scroll_frame, image=self.img_peaks).pack(pady=5)
+        ttk.Label(scroll_frame, image=self.img_peak_spacing).pack(pady=5)
+
+        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(-1 * int(e.delta / 120), "units"))

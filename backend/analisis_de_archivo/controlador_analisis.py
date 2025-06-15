@@ -17,7 +17,11 @@ class ControladorAnalisis:
         ruta = os.path.join("resultados", nombre_carpeta)
 
         os.makedirs(ruta, exist_ok=True)  # Crea la carpeta si no existe
+        print(ruta)
         return ruta
+
+    def get_directorio_salida(self) -> str:
+        return self.directorio_salida
 
     def generar_plots(self):
         y = self.analizador.get_y()
