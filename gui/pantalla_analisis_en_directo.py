@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from backend.analizador_chunks import AnalizadorChunks
+from backend.analisis_en_vivo.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
 import threading
 import tkinter.scrolledtext as ScrolledText

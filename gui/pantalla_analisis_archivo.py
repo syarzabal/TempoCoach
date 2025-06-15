@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from backend.analizador_archivos import AnalizadorArchivos
+from backend.analisis_de_archivo.controlador_analisis import ControladorAnalisis
+
 
 class PantallaAnalisisArchivo(tk.Frame):
 
@@ -24,6 +25,9 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.label_archivo_seleccionado = ttk.Label(self, text="")
         self.label_archivo_seleccionado.pack(pady=5)
 
+        self.btn_analizar = None
+
+
     def _seleccionar_archivo(self):
         ruta_archivo = filedialog.askopenfilename(
             filetypes=[("MP3 y WAV", ("*.mp3", "*.wav"))]
@@ -31,4 +35,18 @@ class PantallaAnalisisArchivo(tk.Frame):
         if ruta_archivo:
             self.archivo_seleccionado = ruta_archivo
             self.label_archivo_seleccionado.config(text=f"Archivo seleccionado: {ruta_archivo}")
-            self.analizador = AnalizadorArchivos(ruta_archivo)
+            self.btn_analizar = ttk.Button(self, text="Analizar archivo", command=lambda: self._analizar_archivo())
+            self.btn_analizar.pack(pady=5)
+
+    def _analizar_archivo(self):
+        self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
+        self.controlador_analisis.generar_plots()
+
+    def _cargar_imagenes(self, path) -> None:
+        # self.img = tk.PhotoImage(file="assets/images/output.png")
+        # tk.Label(self, image=self.img).pack()
+        self.img_stempo = None
+        self.img_dtempo = None
+        self.img_beats = None
+        self.img_peaks = None
+        self.img_peak_spacing = None
