@@ -15,14 +15,13 @@ class AnalizadorArchivos:
         self.peaks = self.__calcular_peaks()
 
     def __calcular_peaks(self):
-        mean = np.mean(np.absolute(self.y)) * 1.3  # TODO: not working as expected
 
         # Calcular distancias de semicorchea
         spm = self.sr * 60  # Samples por minuto
         sc = int(self.stempo * 4)  # Semicorcheas por minuto
         d: int = spm // sc + 256  # Distancia = n samples que abarca una semicorchea en el tempo actual
 
-        peaks, _ = find_peaks(self.y, height=mean, distance=d)
+        peaks, _ = find_peaks(self.y, height=0.5, distance=d)
 
         return peaks
 
@@ -61,12 +60,11 @@ class AnalizadorArchivos:
     def get_onset_env(self):
         return self.onset_env
 
-    def get_peak_times(self):
-        peak_times = librosa.frames_to_time(self.peaks, sr=self.sr)
-        return peak_times
+    def get_peaks(self):
+        return self.peaks
 
     def get_peak_intervals(self):
-        peak_times = self.get_peak_times()
+        peak_times = librosa.frames_to_time(self.peaks, sr=self.sr)
         peak_intervals = np.diff(peak_times)
         return peak_intervals
 

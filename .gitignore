@@ -2,3 +2,4 @@
 .idea/*
 gui/__pycache__/*
 test.log
+resultados/*

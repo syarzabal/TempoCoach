@@ -38,9 +38,11 @@ class PantallaAnalisisArchivo(tk.Frame):
             self.btn_analizar = ttk.Button(self, text="Analizar archivo", command=lambda: self._analizar_archivo())
             self.btn_analizar.pack(pady=5)
 
+    # TODO: añadir visualización de tiempo de carga
     def _analizar_archivo(self):
         self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
         self.controlador_analisis.generar_plots()
+        print("Plots generados")
 
     def _cargar_imagenes(self, path) -> None:
         # self.img = tk.PhotoImage(file="assets/images/output.png")
