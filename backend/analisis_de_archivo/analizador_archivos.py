@@ -64,8 +64,10 @@ class AnalizadorArchivos:
         return self.peaks
 
     def get_peak_intervals(self):
-        peak_times = librosa.frames_to_time(self.peaks, sr=self.sr)
+        peak_times = self.peaks / self.sr
         peak_intervals = np.diff(peak_times)
+        print(f'Peak times: {peak_times}')
+        print(f'Peak intervals: {peak_intervals}')
         return peak_intervals
 
     # TODO: borrar esta función

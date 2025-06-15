@@ -87,16 +87,19 @@ class Plotter:
         plt.close()
 
     def plot_peak_spacing(self, peak_spacing, stempo):
+        redonda = 60.0 / (stempo/2.0)
         negra = 60.0 / stempo
         corchea = 60.0 / (2 * stempo)
         semicorchea = 60.0 / (4 * stempo)
 
         plt.figure(figsize=(10, 4))
-        plt.plot(peak_spacing, lw=1, marker='x', color='orange', label='Picos')
+        plt.plot(peak_spacing, lw=0.5, marker='x', color='orange', label='Picos')
 
-        plt.axhline(y=negra, color='red', linestyle='--', label='Negras')
-        plt.axhline(y=corchea, color='orange', linestyle='--', label='Corcheas')
-        plt.axhline(y=semicorchea, color='yellow', linestyle='--', label='Semicorcheas')
+        alpha_figuras = 0.3
+        plt.axhline(y=redonda, color='blue', linestyle='-', label='Redondas', alpha=alpha_figuras)
+        plt.axhline(y=negra, color='blue', linestyle='--', label='Negras', alpha=alpha_figuras)
+        plt.axhline(y=corchea, color='blue', linestyle='-.', label='Corcheas', alpha=alpha_figuras)
+        plt.axhline(y=semicorchea, color='blue', linestyle=':', label='Semicorcheas', alpha=alpha_figuras)
 
         plt.xlabel("Picos")
         plt.ylabel("Intervalo (s)")
@@ -104,6 +107,7 @@ class Plotter:
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
+        plt.ylim(min(peak_spacing) -0.2 , max(peak_spacing) + 0.2)
 
         ruta = os.path.join(self.dir, "peak_spacing.png")
         plt.savefig(ruta)
