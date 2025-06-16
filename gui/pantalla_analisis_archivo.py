@@ -14,6 +14,7 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.archivo_seleccionado = None
 
         self._crear_widgets()
+        self.__crear_canvas_scrollable()
 
     def _crear_widgets(self):
         ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
@@ -26,9 +27,40 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.label_archivo_seleccionado = ttk.Label(self, text="")
         self.label_archivo_seleccionado.pack(pady=5)
 
-        self.btn_analizar = None
+        self.btn_analizar = ttk.Button(self, text="Analizar archivo", command=self._analizar_archivo)
+        self.btn_analizar.pack(pady=5)
+        self.btn_analizar.config(state="disabled")
+
         self.controlador_analisis = None
 
+    def __crear_canvas_scrollable(self):
+        # Canvas y Scrollbar
+        self.canvas = tk.Canvas(self)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scroll_frame = tk.Frame(self.canvas, bg="gray")
+
+        self.scroll_window = self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="n")
+
+        self.scroll_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+
+        def centrar_scroll_frame(event):
+            canvas_width = event.width
+            self.canvas.itemconfig(self.scroll_window, width=canvas_width)
+
+        self.canvas.bind("<Configure>", centrar_scroll_frame)
+
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Scroll con ratón
+        self.scroll_frame.bind("<Enter>", lambda e: self.canvas.bind_all("<MouseWheel>",
+                                                                         lambda e: self.canvas.yview_scroll(
+                                                                             -1 * int(e.delta / 120), "units")))
+        self.scroll_frame.bind("<Leave>", lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
     def _seleccionar_archivo(self):
         ruta_archivo = filedialog.askopenfilename(
@@ -37,35 +69,31 @@ class PantallaAnalisisArchivo(tk.Frame):
         if ruta_archivo:
             self.archivo_seleccionado = ruta_archivo
             self.label_archivo_seleccionado.config(text=f"Archivo seleccionado: {ruta_archivo}")
-            self.btn_analizar = ttk.Button(self, text="Analizar archivo", command=lambda: self._analizar_archivo())
-            self.btn_analizar.pack(pady=5)
+
+            self.btn_analizar.config(state="normal")
+
+            # Limpiar imágenes anteriores si las hay
+            self.img_dtempo = None
+            self.img_beats = None
+            self.img_peaks = None
+            self.img_peak_spacing = None
 
     # TODO: añadir visualización de tiempo de carga
     def _analizar_archivo(self):
+        self.btn_analizar.config(state="disabled", text="Cargando...")
         self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
         self.controlador_analisis.generar_plots()
         print("Plots generados")
         self._cargar_imagenes()
+        self.btn_analizar.config(state="disabled", text="Analizar archivo")
 
     def _cargar_imagenes(self) -> None:
         if self.controlador_analisis is None:
             return
 
-        # Container scrolleable
-        canvas = tk.Canvas(self, height=400)  # Puedes ajustar la altura
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
-        scroll_frame = ttk.Frame(canvas)
-
-        scroll_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Limpiar contenido anterior
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
 
         dir_salida = self.controlador_analisis.get_directorio_salida()
 
@@ -74,9 +102,7 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.img_peaks = tk.PhotoImage(file=os.path.join(dir_salida, "audio_peaks.png"))
         self.img_peak_spacing = tk.PhotoImage(file=os.path.join(dir_salida, "peak_spacing.png"))
 
-        ttk.Label(scroll_frame, image=self.img_dtempo).pack(pady=5)
-        ttk.Label(scroll_frame, image=self.img_beats).pack(pady=5)
-        ttk.Label(scroll_frame, image=self.img_peaks).pack(pady=5)
-        ttk.Label(scroll_frame, image=self.img_peak_spacing).pack(pady=5)
-
-        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(-1 * int(e.delta / 120), "units"))
+        ttk.Label(self.scroll_frame, image=self.img_dtempo).pack(pady=5, anchor="center")
+        ttk.Label(self.scroll_frame, image=self.img_beats).pack(pady=5, anchor="center")
+        ttk.Label(self.scroll_frame, image=self.img_peaks).pack(pady=5, anchor="center")
+        ttk.Label(self.scroll_frame, image=self.img_peak_spacing).pack(pady=5, anchor="center")

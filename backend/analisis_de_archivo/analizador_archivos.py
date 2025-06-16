@@ -21,7 +21,8 @@ class AnalizadorArchivos:
         sc = int(self.stempo * 4)  # Semicorcheas por minuto
         d: int = spm // sc + 256  # Distancia = n samples que abarca una semicorchea en el tempo actual
 
-        peaks, _ = find_peaks(self.y, height=0.5, distance=d)
+        h = np.percentile(np.abs(self.y), 95)  # Para que los peaks estén por encima del 95% de la señal
+        peaks, _ = find_peaks(self.y, height=h, distance=d)
 
         return peaks
 

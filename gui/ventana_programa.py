@@ -1,4 +1,5 @@
-import tkinter as tk
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
 from gui.pantalla_inicio import PantallaInicio
 from gui.pantalla_analisis_en_directo import PantallaAnalisisDirecto
 from gui.pantalla_analisis_archivo import PantallaAnalisisArchivo
@@ -10,13 +11,13 @@ pantallas = [
     (PantallaAnalisisArchivo, "PantallaAnalisisArchivo")
 ]
 
-class VentanaPrograma(tk.Tk):
+class VentanaPrograma(tb.Window):
     def __init__(self):
-        super().__init__()
+        super().__init__(themename="litera")
         self.title("Tempo Coach")
         self.geometry("1400x800")
 
-        self.frame_container = tk.Frame(self, bg="grey")
+        self.frame_container = tb.Frame(self)
         self.frame_container.pack(side="top", fill="both", expand=True)
 
         # Diccionario para almacenar las pantallas
