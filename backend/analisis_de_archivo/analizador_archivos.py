@@ -15,7 +15,6 @@ class AnalizadorArchivos:
         self.peaks = self.__calcular_peaks()
 
     def __calcular_peaks(self):
-
         # Calcular distancias de semicorchea
         spm = self.sr * 60  # Samples por minuto
         sc = int(self.stempo * 4)  # Semicorcheas por minuto
