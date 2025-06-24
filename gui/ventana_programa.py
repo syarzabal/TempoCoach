@@ -13,7 +13,7 @@ pantallas = [
 
 class VentanaPrograma(tb.Window):
     def __init__(self):
-        super().__init__(themename="litera") #litera #darkly
+        super().__init__(themename="cyborg") #litera #darkly #cyborg
         self.title("Tempo Coach")
         self.geometry("1400x800")
 

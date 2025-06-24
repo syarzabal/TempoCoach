@@ -3,9 +3,8 @@ from tkinter import ttk
 from backend.analisis_en_vivo.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
 import threading
-import tkinter.scrolledtext as ScrolledText
-import logging
-from text_handler import TextHandler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 
 
 class PantallaAnalisisDirecto(tk.Frame):
@@ -19,19 +18,32 @@ class PantallaAnalisisDirecto(tk.Frame):
         self.thread = None
         self.analizador = AnalizadorChunks()
 
+        # Campos para graficar el tempo en directo
+        plt.style.use('dark_background')
+        self.tempos = []
+        self.tiempos = []
+        self.fig, self.ax = plt.subplots()
+        self.linea, = self.ax.plot([], [], 'o-', color='blue', lw=3)
+        self.tiempo_total = 0  # acumulador de tiempo en segundos
+
         self._crear_widgets()
-        self._configurar_logging()
 
     def _crear_widgets(self):
         ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
 
         ttk.Label(self, text="Calcular tempo en directo", font=("Segoe UI", 16)).pack(pady=15)
 
-        self.frame_container = tk.Frame(self, bg="grey", height=200)
-        self.frame_container.pack(side="top", fill="x", expand=True, padx=5, pady=5)
+        self.label_current_tempo = ttk.Label(self, text="0 BPM", font=("Segoe UI", 25))
+        self.label_current_tempo.pack(pady=15)
 
-        self.text_display = ScrolledText.ScrolledText(self.frame_container, state='disabled', height=15, font=('Helvetica', 18))
-        self.text_display.pack(side="bottom", fill="x")
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=5)
+        self.ax.set_title("Tempo en tiempo real")
+        self.ax.set_xlabel("Tiempo (s)")
+        self.ax.set_ylim(60, 200)
+        self.ax.set_xlim(0, 30)
+        self.ax.set_ylabel("BPM")
+        self.ax.grid(True)
 
         self.label_status = tk.Label(self, text="Status: detenido", font=("Segoe UI", 10))
         self.label_status.pack(pady=5)
@@ -39,13 +51,6 @@ class PantallaAnalisisDirecto(tk.Frame):
         self.btn_grabar = ttk.Button(self, text="Grabar", command=self._toggle_worker)
         self.btn_grabar.pack(pady=5)
 
-    def _configurar_logging(self):
-        text_handler = TextHandler(self.text_display)
-        logging.basicConfig(filename='test.log',
-                            filemode='w',
-                            level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
-        logging.getLogger().addHandler(text_handler)
 
     def _toggle_worker(self):
         self.running = not self.running
@@ -68,11 +73,26 @@ class PantallaAnalisisDirecto(tk.Frame):
         sd.wait()
         return audio.flatten()
 
+    def _actualizar_grafico(self):
+        self.linea.set_data(self.tiempos, self.tempos)
+        self.label_current_tempo.config(text=f"{self.tempos[-1]:.2f} BPM")
+
+        # Aumentar límite del eje X en bloques de 30 s
+        if self.tiempo_total > self.ax.get_xlim()[1]:
+            nuevo_limite = self.ax.get_xlim()[1] + 30
+            self.ax.set_xlim(self.ax.get_xlim()[0], nuevo_limite)
+        elif self.tiempo_total == self.DURACION_CHUNK:  # al primer dato
+            self.ax.set_xlim(0, 30)
+
+        self.canvas.draw()
+
     def _procesar_audio(self, audio):
         self._actualizar_label_status("Status: analizando tempo...")
         tempo = self.analizador.getTempo(audio_chunk=audio, sample_rate=self.SAMPLE_RATE)
-        display_text = f'[{tempo:.1f} BPM] \t\t [{self._formatear_tempo(tempo)}]'
-        logging.info(display_text)
+        self.tiempo_total += self.DURACION_CHUNK
+        self.tempos.append(tempo)
+        self.tiempos.append(self.tiempo_total)
+        self._actualizar_grafico()
 
     def _procesar_audio_loop(self):
         while self.running:

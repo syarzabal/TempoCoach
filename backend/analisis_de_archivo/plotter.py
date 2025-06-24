@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 class Plotter:
     def __init__(self, directorio_salida):
         self.dir = directorio_salida
-        plt.style.use("default")
+        plt.style.use("dark_background")
 
     def plot_audio(self, y, sr):
         tiempo = np.linspace(0, len(y) / sr, num=len(y))
