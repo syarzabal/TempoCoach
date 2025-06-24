@@ -38,6 +38,7 @@ class PantallaAnalisisDirecto(tk.Frame):
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=5)
+
         self.ax.set_title("Tempo en tiempo real")
         self.ax.set_xlabel("Tiempo (s)")
         self.ax.set_ylim(60, 200)

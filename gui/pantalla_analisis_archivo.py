@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from backend.analisis_de_archivo.controlador_analisis import ControladorAnalisis
 import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class PantallaAnalisisArchivo(tk.Frame):
@@ -13,10 +14,11 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.analizador = None
         self.archivo_seleccionado = None
 
-        self._crear_widgets()
+        self.__crear_widgets()
         self.__crear_canvas_scrollable()
 
-    def _crear_widgets(self):
+
+    def __crear_widgets(self):
         ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
         ttk.Label(self, text="Analizar desde archivo", font=("Segoe UI", 16)).pack(pady=20)
         ttk.Label(self, text="Para resultados más precisos se recomienda usar archivos .wav", foreground="gray").pack(pady=5)
@@ -32,6 +34,7 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.btn_analizar.config(state="disabled")
 
         self.controlador_analisis = None
+
 
     def __crear_canvas_scrollable(self):
         # Canvas y Scrollbar
@@ -62,6 +65,7 @@ class PantallaAnalisisArchivo(tk.Frame):
                                                                              -1 * int(e.delta / 120), "units")))
         self.scroll_frame.bind("<Leave>", lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
+
     def _seleccionar_archivo(self):
         ruta_archivo = filedialog.askopenfilename(
             filetypes=[("MP3 y WAV", ("*.mp3", "*.wav"))]
@@ -78,14 +82,20 @@ class PantallaAnalisisArchivo(tk.Frame):
             self.img_peaks = None
             self.img_peak_spacing = None
 
+
+
+
     # TODO: añadir visualización de tiempo de carga
     def _analizar_archivo(self):
         self.btn_analizar.config(state="disabled", text="Cargando...")
         self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
-        self.controlador_analisis.generar_plots()
+        # Generar gráficos en forma de objetos matplotlib
+        self.figuras_basicas = self.controlador_analisis.generar_plots_basicos()
+        self.figuras_peaks = self.controlador_analisis.generar_plots_peaks()
         print("Plots generados")
         self._cargar_imagenes()
         self.btn_analizar.config(state="disabled", text="Analizar archivo")
+
 
     def _cargar_imagenes(self) -> None:
         if self.controlador_analisis is None:
@@ -95,14 +105,20 @@ class PantallaAnalisisArchivo(tk.Frame):
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-        dir_salida = self.controlador_analisis.get_directorio_salida()
 
-        self.img_dtempo = tk.PhotoImage(file=os.path.join(dir_salida, "dynamic_tempo.png"))
-        self.img_beats = tk.PhotoImage(file=os.path.join(dir_salida, "beats_vs_onsets.png"))
-        self.img_peaks = tk.PhotoImage(file=os.path.join(dir_salida, "audio_peaks.png"))
-        self.img_peak_spacing = tk.PhotoImage(file=os.path.join(dir_salida, "peak_spacing.png"))
 
-        ttk.Label(self.scroll_frame, image=self.img_dtempo).pack(pady=5, anchor="center")
-        ttk.Label(self.scroll_frame, image=self.img_beats).pack(pady=5, anchor="center")
-        ttk.Label(self.scroll_frame, image=self.img_peaks).pack(pady=5, anchor="center")
-        ttk.Label(self.scroll_frame, image=self.img_peak_spacing).pack(pady=5, anchor="center")
+        figuras = {
+            "Tempograma": self.figuras_basicas["dtempo"],
+            "Porcentaje de estabilidad" : self.figuras_basicas["stability_pie"],
+            "Beats vs Onsets": self.figuras_basicas["rw_beats"],
+            "Forma de onda con picos": self.figuras_peaks["peaks"],
+            "Espaciado entre picos": self.figuras_peaks["peak_spacing"],
+        }
+
+        for titulo, fig in figuras.items():
+            ttk.Label(self.scroll_frame, text=titulo, font=("Segoe UI", 12, "bold")).pack(pady=(15, 5))
+            canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
+            canvas.draw()
+            canvas_widget = canvas.get_tk_widget()
+            canvas_widget.pack(pady=(5, 15), anchor="center")
+
