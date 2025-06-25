@@ -77,13 +77,17 @@ class PantallaAnalisisArchivo(tk.Frame):
             self.btn_analizar.config(state="normal")
 
             self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
+
+            # Eliminar figura anterior si existe
+            if hasattr(self, "canvas_widget_audio") and self.canvas_widget_audio.winfo_exists():
+                self.canvas_widget_audio.destroy()
+
             figura_audio = self.controlador_analisis.generar_plot_audio()
             fig = figura_audio["audio"]
-            ttk.Label(self.scroll_frame, text="Audio", font=("Segoe UI", 12, "bold")).pack(pady=(15, 5))
             canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
             canvas.draw()
-            canvas_widget = canvas.get_tk_widget()
-            canvas_widget.pack(pady=(5, 15), anchor="center")
+            self.canvas_widget_audio = canvas.get_tk_widget()
+            self.canvas_widget_audio.pack(pady=(5, 15), anchor="center")
 
 
 
@@ -125,4 +129,6 @@ class PantallaAnalisisArchivo(tk.Frame):
             canvas.draw()
             canvas_widget = canvas.get_tk_widget()
             canvas_widget.pack(pady=(5, 15), anchor="center")
+
+        ttk.Button(self.scroll_frame, text="Boton de prueba", command=None).pack(pady=(5, 15), anchor="center")
 
