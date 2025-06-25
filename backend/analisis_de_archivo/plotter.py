@@ -219,28 +219,3 @@ class Plotter:
         by_label = dict(zip(labels, handles))
         ax.legend(by_label.values(), by_label.keys())
         return fig
-
-    # def plot_peak_spacing(self, peak_spacing, stempo):
-    #     redonda = 60.0 / (stempo / 2.0)
-    #     negra = 60.0 / stempo
-    #     corchea = 60.0 / (2 * stempo)
-    #     semicorchea = 60.0 / (4 * stempo)
-    #
-    #     fig, ax = plt.subplots(figsize=(10, 4))
-    #     ax.plot(peak_spacing, lw=0.5, marker='x', color='orange', label='Picos')
-    #
-    #     alpha_figuras = 0.3
-    #     ax.axhline(y=redonda, color='blue', linestyle='-', label='Redondas', alpha=alpha_figuras)
-    #     ax.axhline(y=negra, color='blue', linestyle='--', label='Negras', alpha=alpha_figuras)
-    #     ax.axhline(y=corchea, color='blue', linestyle='-.', label='Corcheas', alpha=alpha_figuras)
-    #     ax.axhline(y=semicorchea, color='blue', linestyle=':', label='Semicorcheas', alpha=alpha_figuras)
-    #
-    #     ax.set_xlabel("Picos")
-    #     ax.set_ylabel("Intervalo (s)")
-    #     ax.set_title("Espaciado entre picos de la onda de audio")
-    #     ax.legend()
-    #     ax.grid(True)
-    #     ax.set_ylim(min(peak_spacing) - 0.2, max(peak_spacing) + 0.2)
-    #     fig.tight_layout()
-    #
-    #     return fig

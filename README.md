@@ -6,3 +6,8 @@ el archivo requirements.txt
 ``` powershell
 pip install -r requirements.txt
 ```
+
+Para generar las clases UML descargar pyreverse y Graphviz y ejecutar el siguiente comando:
+``` powershell
+pyreverse -o png -p TempoCoach .
+```
