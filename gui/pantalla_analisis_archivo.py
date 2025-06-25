@@ -76,11 +76,16 @@ class PantallaAnalisisArchivo(tk.Frame):
 
             self.btn_analizar.config(state="normal")
 
-            # Limpiar imágenes anteriores si las hay
-            self.img_dtempo = None
-            self.img_beats = None
-            self.img_peaks = None
-            self.img_peak_spacing = None
+            self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
+            figura_audio = self.controlador_analisis.generar_plot_audio()
+            fig = figura_audio["audio"]
+            ttk.Label(self.scroll_frame, text="Audio", font=("Segoe UI", 12, "bold")).pack(pady=(15, 5))
+            canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
+            canvas.draw()
+            canvas_widget = canvas.get_tk_widget()
+            canvas_widget.pack(pady=(5, 15), anchor="center")
+
+
 
 
 
@@ -88,7 +93,7 @@ class PantallaAnalisisArchivo(tk.Frame):
     # TODO: añadir visualización de tiempo de carga
     def _analizar_archivo(self):
         self.btn_analizar.config(state="disabled", text="Cargando...")
-        self.controlador_analisis = ControladorAnalisis(self.archivo_seleccionado)
+
         # Generar gráficos en forma de objetos matplotlib
         self.figuras_basicas = self.controlador_analisis.generar_plots_basicos()
         self.figuras_peaks = self.controlador_analisis.generar_plots_peaks()
@@ -105,9 +110,8 @@ class PantallaAnalisisArchivo(tk.Frame):
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-
-
         figuras = {
+            "Audio": self.figuras_basicas["audio"],
             "Tempograma": self.figuras_basicas["dtempo"],
             "Porcentaje de estabilidad" : self.figuras_basicas["stability_pie"],
             "Beats vs Onsets": self.figuras_basicas["rw_beats"],

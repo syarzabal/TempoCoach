@@ -23,6 +23,16 @@ class ControladorAnalisis:
     def get_directorio_salida(self) -> str:
         return self.directorio_salida
 
+    def generar_plot_audio(self):
+        y =         self.analizador.get_y()
+        sr =        self.analizador.get_sr()
+
+        plots = {
+            "audio": self.plotter.plot_audio(y=y, sr=sr)
+        }
+
+        return plots
+
     def generar_plots_basicos(self):
         y =         self.analizador.get_y()
         sr =        self.analizador.get_sr()
@@ -35,7 +45,7 @@ class ControladorAnalisis:
 
         # Generar y guardar los gráficos
         plots = {
-            "audio" :       self.plotter.plot_audio(y=y, sr=sr),
+            "audio": self.plotter.plot_audio(y=y, sr=sr),
             "dtempo" :      self.plotter.plot_dynamic_tempo(dynamic_tempo=dtempo),
             "stability_pie" :       self.plotter.plot_tempo_stability_pie(stats=stats),
             "rw_beats" :    self.plotter.plot_rw_beats(beats=beats, onset_env=onset_env),
