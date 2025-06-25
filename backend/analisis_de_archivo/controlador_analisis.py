@@ -64,7 +64,9 @@ class ControladorAnalisis:
         # Generar y guardar los gráficos
         plots = {
             "peaks" :       self.plotter.plot_peaks(y=y, sr=sr, peaks=peaks, height=height),
-            "peak_spacing" : self.plotter.plot_peak_spacing(peak_spacing=peak_intervals, stempo=stempo)
+            "peaks_closeup" : self.plotter.plot_peaks_closeup(y=y, sr=sr, peaks=peaks, height=height),
+            "peaks_timeline" : self.plotter.plot_peaks_timeline(y=y, sr=sr, peaks=peaks),
+            "peak_spacing": self.plotter.plot_peak_intervals_with_colored_zones(peaks=peaks, sr=sr)
         }
 
         return plots
