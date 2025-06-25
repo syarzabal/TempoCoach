@@ -11,7 +11,7 @@ class Plotter:
         tiempo = np.linspace(0, len(y) / sr, num=len(y))
         fig, ax = plt.subplots(figsize=(10, 4))
 
-        ax.plot(tiempo, y, linewidth=0.8)
+        ax.plot(tiempo, y, linewidth=0.8, alpha=0.9)
         ax.set_title("Forma de onda del audio")
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel("Amplitud")
@@ -29,26 +29,27 @@ class Plotter:
         fig, ax = plt.subplots(figsize=(12, 5))
         ax.grid(True)
 
-        ax.fill_between(times, tempo_medio - 15, tempo_medio + 15, color='red', alpha=0.1, label='±15 BPM')
-        ax.fill_between(times, tempo_medio - 10, tempo_medio + 10, color='yellow', alpha=0.2, label='±10 BPM')
-        ax.fill_between(times, tempo_medio - 5, tempo_medio + 5, color='green', alpha=0.2, label='±5 BPM')
+        ax.fill_between(times, tempo_medio - 15, tempo_medio + 15, color='red', alpha=0.1)
+        ax.fill_between(times, tempo_medio - 10, tempo_medio + 10, color='yellow', alpha=0.2)
+        ax.fill_between(times, tempo_medio - 5, tempo_medio + 5, color='green', alpha=0.2)
 
-        ax.axhline(tempo_medio, color='gray', linestyle='--', linewidth=1.5, label=f'Tempo medio: {tempo_medio:.2f} BPM')
+        ax.axhline(tempo_medio, color='yellow', linestyle='--', linewidth=1, alpha=0.5, label=f'Tempo medio: {tempo_medio:.2f} BPM')
 
         diffs = np.abs(tempi - tempo_medio)
         mask_green = diffs <= 5
         mask_yellow = (diffs > 5) & (diffs <= 10)
         mask_red = (diffs > 10) & (diffs <= 15)
 
-        ax.plot(times, tempi, color='white', lw=1.5, label='Tempo dinámico')
-        ax.scatter(times[mask_green], tempi[mask_green], color='green', s=20, label='Dentro de ±5 BPM')
-        ax.scatter(times[mask_yellow], tempi[mask_yellow], color='orange', s=20, label='Dentro de ±10 BPM')
-        ax.scatter(times[mask_red], tempi[mask_red], color='red', s=20, label='Dentro de ±15 BPM')
+        ax.plot(times, tempi, color='white', lw=1, label='Tempo dinámico', alpha=0.5)
+        ax.scatter(times[mask_green], tempi[mask_green], color='green', s=20)
+        ax.scatter(times[mask_yellow], tempi[mask_yellow], color='orange', s=20)
+        ax.scatter(times[mask_red], tempi[mask_red], color='red', s=20)
 
         ax.set_ylim(tempo_medio - 30, tempo_medio + 30)
         ax.set_xlabel('Tiempo (s)')
         ax.set_ylabel('Tempo (BPM)')
         ax.set_title('Tempograma')
+        ax.legend(loc='best')
         fig.tight_layout()
 
         return fig
@@ -82,22 +83,22 @@ class Plotter:
         onset_peaks, _ = find_peaks(onset_env, height=umbral)
 
         fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(onset_env, label='Onset strength', color='blue', lw=2.5)
+        ax.plot(onset_env, label='Onset', color='blue', lw=2.5)
 
         for beat in beats:
             color = 'green' if np.any(np.abs(onset_peaks - beat) <= tolerancia_frames) else 'red'
             ax.axvline(x=beat, color=color, linewidth=1)
 
-        ax.set_title('Beats vs Onset Peaks')
+        ax.set_title('Pulsos vs onsets')
         ax.set_xlabel('Frame')
-        ax.set_ylabel('Onset Strength')
+        ax.set_ylabel('Intensidad del onset')
         ax.legend()
         ax.grid(True)
         fig.tight_layout()
 
         return fig
 
-    def plot_peaks(self, y, sr, peaks):
+    def plot_peaks(self, y, sr, peaks, height):
         tiempo_y = np.linspace(0, len(y) / sr, num=len(y))
         peak_times = peaks / sr
 
@@ -106,12 +107,16 @@ class Plotter:
         ax.plot(peak_times, y[peaks], 'x', color='orange', label='Picos')
         ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', label='Picos', lw=0.2)
 
+        plt.axhline(1, color='green', linestyle='--', linewidth=1, label='Upper limit')
+        plt.axhline(-1, color='green', linestyle='--', linewidth=1, label='Lower limit')
+        plt.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Threshold')
+
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel("Amplitud")
         ax.set_title("Forma de onda con picos detectados")
         ax.legend()
         ax.grid(True)
-        ax.set_ylim(-1, 1)
+        ax.set_ylim(-1.5, 1.5)
         fig.tight_layout()
 
         return fig

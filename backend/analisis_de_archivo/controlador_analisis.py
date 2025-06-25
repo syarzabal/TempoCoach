@@ -53,7 +53,8 @@ class ControladorAnalisis:
 
         return plots
 
-    def generar_plots_peaks(self):
+    def generar_plots_peaks(self, height):
+        self.analizador.set_peak_height(height)
         y =         self.analizador.get_y()
         sr =        self.analizador.get_sr()
         stempo =    self.analizador.get_stempo()
@@ -62,7 +63,7 @@ class ControladorAnalisis:
 
         # Generar y guardar los gráficos
         plots = {
-            "peaks" :       self.plotter.plot_peaks(y=y, sr=sr, peaks=peaks),
+            "peaks" :       self.plotter.plot_peaks(y=y, sr=sr, peaks=peaks, height=height),
             "peak_spacing" : self.plotter.plot_peak_spacing(peak_spacing=peak_intervals, stempo=stempo)
         }
 

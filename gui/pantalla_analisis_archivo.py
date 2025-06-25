@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
 from backend.analisis_de_archivo.controlador_analisis import ControladorAnalisis
 import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -100,10 +101,10 @@ class PantallaAnalisisArchivo(tk.Frame):
 
         # Generar gráficos en forma de objetos matplotlib
         self.figuras_basicas = self.controlador_analisis.generar_plots_basicos()
-        self.figuras_peaks = self.controlador_analisis.generar_plots_peaks()
         print("Plots generados")
         self._cargar_imagenes()
         self.btn_analizar.config(state="disabled", text="Analizar archivo")
+
 
 
     def _cargar_imagenes(self) -> None:
@@ -114,21 +115,43 @@ class PantallaAnalisisArchivo(tk.Frame):
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-        figuras = {
-            "Audio": self.figuras_basicas["audio"],
-            "Tempograma": self.figuras_basicas["dtempo"],
-            "Porcentaje de estabilidad" : self.figuras_basicas["stability_pie"],
-            "Beats vs Onsets": self.figuras_basicas["rw_beats"],
-            "Forma de onda con picos": self.figuras_peaks["peaks"],
-            "Espaciado entre picos": self.figuras_peaks["peak_spacing"],
-        }
-
-        for titulo, fig in figuras.items():
-            ttk.Label(self.scroll_frame, text=titulo, font=("Segoe UI", 12, "bold")).pack(pady=(15, 5))
+        # Tempo y pulsos ------------------------
+        ttk.Label(self.scroll_frame, text="Tempo y pulsos", font=("Segoe UI", 35)).pack(pady=(50, 25))
+        for fig in self.figuras_basicas.values():
             canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
             canvas.draw()
             canvas_widget = canvas.get_tk_widget()
             canvas_widget.pack(pady=(5, 15), anchor="center")
 
-        ttk.Button(self.scroll_frame, text="Boton de prueba", command=None).pack(pady=(5, 15), anchor="center")
+        # Picos de audio ----------------------
+        ttk.Label(self.scroll_frame, text="Picos de audio", font=("Segoe UI", 35)).pack(pady=(50, 25))
 
+        # Caja de texto para umbral
+        ttk.Label(self.scroll_frame, text="Umbral (0.0 - 1.0):").pack()
+        self.entry_umbral = ttk.Entry(self.scroll_frame)
+        self.entry_umbral.insert(0, "0.5")  # Valor por defecto
+        self.entry_umbral.pack(pady=(5, 10))
+
+        #Boton de analisis de picos
+        self.btn_peaks = ttk.Button(self.scroll_frame, text="Analizar picos de audio",
+                   command=lambda: self._analizar_peaks())
+        self.btn_peaks.pack(pady=(50, 30), anchor="center")
+
+
+    def _analizar_peaks(self):
+        try:
+            umbral = float(self.entry_umbral.get())
+            if not (0 <= umbral <= 1):
+                raise ValueError
+        except ValueError:
+            tk.messagebox.showerror("Valor inválido", "Por favor, introduce un número entre 0.0 y 1.0.")
+            return
+
+        self.figuras_peaks = self.controlador_analisis.generar_plots_peaks(height=umbral)
+
+
+        for fig in self.figuras_peaks.values():
+            canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
+            canvas.draw()
+            canvas_widget = canvas.get_tk_widget()
+            canvas_widget.pack(pady=(5, 15), anchor="center")
