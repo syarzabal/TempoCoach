@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+
+from numba.core.types import Boolean
+
 from backend.analisis_en_vivo.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
 import threading
@@ -9,14 +12,14 @@ import matplotlib.pyplot as plt
 
 class PantallaAnalisisDirecto(tk.Frame):
     DURACION_CHUNK = 4  # en segundos
-    SAMPLE_RATE = 44100
+    SAMPLE_RATE = 44100 # Hz (samples/seg)
 
     def __init__(self, parent_widget, controller):
         super().__init__(parent_widget)
         self.controller = controller
-        self.running = False
-        self.thread = None
-        self.analizador = AnalizadorChunks()
+        self.running: bool = False
+        self.thread: threading.Thread = None
+        self.analizador: AnalizadorChunks = AnalizadorChunks()
 
         # Campos para graficar el tempo en directo
         plt.style.use('dark_background')
@@ -100,14 +103,3 @@ class PantallaAnalisisDirecto(tk.Frame):
             audio = self._grabar_audio()
             self._procesar_audio(audio)
         self._actualizar_label_status("Status: detenido")
-
-    def _formatear_tempo(self, tempo):
-        escala = ""
-        for i in range(60, 201):
-            if i == int(tempo):
-                escala += "!"
-            elif i % 20 == 0:
-                escala += ":"
-            else:
-                escala += "."
-        return escala

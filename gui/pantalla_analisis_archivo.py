@@ -12,7 +12,6 @@ class PantallaAnalisisArchivo(tk.Frame):
     def __init__(self, parent_widget, controller):
         super().__init__(parent_widget)
         self.controller = controller
-        self.analizador = None
         self.archivo_seleccionado = None
 
         self.__crear_widgets()
@@ -100,16 +99,8 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.btn_analizar.config(state="disabled", text="Cargando...")
 
         # Generar gráficos en forma de objetos matplotlib
-        self.figuras_basicas = self.controlador_analisis.generar_plots_basicos()
+        self.figuras_basicas = self.controlador_analisis.generar_figuras_basicas()
         print("Plots generados")
-        self._cargar_imagenes()
-        self.btn_analizar.config(state="disabled", text="Analizar archivo")
-
-
-
-    def _cargar_imagenes(self) -> None:
-        if self.controlador_analisis is None:
-            return
 
         # Limpiar contenido anterior
         for widget in self.scroll_frame.winfo_children():
@@ -137,6 +128,7 @@ class PantallaAnalisisArchivo(tk.Frame):
                    command=lambda: self._analizar_peaks())
         self.btn_peaks.pack(pady=(50, 30), anchor="center")
 
+        self.btn_analizar.config(state="disabled", text="Analizar archivo")
 
     def _analizar_peaks(self):
         try:
@@ -147,7 +139,7 @@ class PantallaAnalisisArchivo(tk.Frame):
             tk.messagebox.showerror("Valor inválido", "Por favor, introduce un número entre 0.0 y 1.0.")
             return
 
-        self.figuras_peaks = self.controlador_analisis.generar_plots_peaks(height=umbral)
+        self.figuras_peaks = self.controlador_analisis.generar_figuras_peaks(height=umbral)
 
 
         for fig in self.figuras_peaks.values():

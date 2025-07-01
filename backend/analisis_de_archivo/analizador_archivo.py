@@ -6,22 +6,22 @@ from scipy.signal import find_peaks
 
 class AnalizadorArchivo:
     def __init__(self, ruta_archivo):
-        self.archivo_seleccionado = ruta_archivo
-        self.peak_height = 0.5
-        self.y = None
-        self.sr = None
+        self.archivo: str = ruta_archivo
+        self.peak_height: float = 0.5
+        self.y: list = None
+        self.sr: int = None
 
-        self.stempo = None
-        self.beats = None
+        self.stempo: float = None
+        self.beats: list = None
 
-        self.onset_env = None
+        self.onset_env: list = None
 
-        self.peaks = None
-        self.peak_intervals = None
+        self.peaks: list = None
+        self.peak_intervals: list = None
 
-        self.dtempo = None # Diccionario
+        self.dtempo: list = None # Diccionario
 
-        self.stats_estabilidad = None
+        self.stats_estabilidad: dict = None
 
 
     """
@@ -36,7 +36,7 @@ class AnalizadorArchivo:
     def __calcular_y_sr(self):
         # Solo se calcula una vez.
         if self.y is None or self.sr is None:
-            self.y, self.sr = librosa.load(self.archivo_seleccionado)
+            self.y, self.sr = librosa.load(self.archivo)
 
     def __calcular_stempo_beats(self):
         # Solo se calcula una vez.

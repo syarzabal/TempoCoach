@@ -10,9 +10,6 @@ class AnalizadorChunks:
         if audio_chunk is None or len(audio_chunk) == 0:
             raise ValueError('Audio chunk vacío')
 
-        tempo = librosa.feature.tempo(y=audio_chunk, sr=sample_rate) # TODO: start_bpm, std_bpm, max_tempo
-        return float(tempo[0])
+        tempo = librosa.feature.tempo(y=audio_chunk, sr=sample_rate)
 
-    # TODO: borrar esta función
-    def testConexion(self) -> str:
-        return "Conexión establecida"
+        return float(tempo[0])

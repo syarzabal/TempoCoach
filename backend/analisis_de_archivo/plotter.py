@@ -77,28 +77,41 @@ class Plotter:
 
         return fig
 
-    def plot_rw_beats(self, beats, onset_env):
-        tolerancia_frames = 1
-        umbral = 0.5
-        onset_peaks, _ = find_peaks(onset_env, height=umbral)
+    def plot_rw_beats(self, beats, y, sr, hop_length=512):
+        import librosa
+
+        tolerancia_segundos = 0.1  # 100 ms
+        umbral = 0.05
+
+        tiempo_y = np.linspace(0, len(y) / sr, num=len(y))
+        beat_times = librosa.frames_to_time(beats, sr=sr, hop_length=hop_length)
+        tolerancia_muestras = int(tolerancia_segundos * sr)
 
         fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(onset_env, label='Onset', color='blue', lw=2.5)
+        ax.plot(tiempo_y, y, label='Forma de onda', lw=1) # color='blue'
 
-        for beat in beats:
-            color = 'green' if np.any(np.abs(onset_peaks - beat) <= tolerancia_frames) else 'red'
-            ax.axvline(x=beat, color=color, linewidth=1)
+        for beat_sec in beat_times:
+            idx = int(beat_sec * sr)
 
-        ax.set_title('Pulsos vs onsets')
-        ax.set_xlabel('Frame')
-        ax.set_ylabel('Intensidad del onset')
+            # Crear ventana alrededor del beat
+            start = max(0, idx - tolerancia_muestras // 2)
+            end = min(len(y), idx + tolerancia_muestras // 2)
+            ventana = y[start:end]
+
+            # Comprobar si hay amplitud significativa en la ventana
+            tiene_audio = np.max(np.abs(ventana)) > umbral
+            color = 'green' if tiene_audio else 'red'
+
+            ax.axvline(x=beat_sec, color=color, linewidth=1)
+
+        ax.set_title('Forma de onda con pulsos detectados')
+        ax.set_xlabel('Tiempo (s)')
+        ax.set_ylabel('Amplitud')
         ax.legend()
         ax.grid(True)
         fig.tight_layout()
 
         return fig
-
-
 
     # Plots para picos de audio -----------------------------------------------------------------------------------
 
@@ -130,11 +143,11 @@ class Plotter:
         peak_times = peaks / sr
 
         fig, ax = plt.subplots(figsize=(15, 5))
-        ax.plot(tiempo_y, y, label='Amplitud', lw=1)
+        ax.plot(tiempo_y, y, label='Amplitud', lw=2)
         ax.plot(peak_times, y[peaks], 'x', color='orange', label='Picos')
         ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', lw=0.2, label='Picos')
-        ax.axhline(1, color='green', linestyle='--', linewidth=1, label='Upper limit')
-        ax.axhline(-1, color='green', linestyle='--', linewidth=1, label='Lower limit')
+        ax.axhline(1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Upper limit')
+        ax.axhline(-1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Lower limit')
         ax.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Threshold')
 
         ax.set_xlabel("Tiempo (s)")
@@ -142,10 +155,14 @@ class Plotter:
         ax.set_title("Zoom en forma de onda con picos detectados")
         ax.grid(True)
         ax.set_ylim(height - 0.2, 1.5)
+        ax.legend()
         fig.tight_layout()
         return fig
 
-    def plot_peaks_timeline(self, y, sr, peaks, density_threshold=8, bin_size=0.06):
+    def plot_peaks_timeline(self, y, sr, peaks):
+        density_threshold = 8
+        bin_size = 0.06
+
         peak_times = peaks / sr
         deltas = np.diff(peak_times)
         bin_edges = np.arange(0, max(deltas) + bin_size, bin_size)
@@ -174,13 +191,17 @@ class Plotter:
         ax.axhline(y=1, color='black', linewidth=0.5, linestyle='-')
 
         ax.set_xlabel("Tiempo (s)")
+        ax.set_ylabel(" ")
         ax.set_yticks([])
         ax.set_title("Línea temporal de picos detectados\nCategorizados por intervalo")
         ax.grid(True, axis='x')
         fig.tight_layout()
         return fig
 
-    def plot_peak_intervals_with_colored_zones(self, peaks, sr, density_threshold=8, bin_size=0.06):
+    def plot_peak_intervals(self, peaks, sr):
+        density_threshold = 8
+        bin_size = 0.06
+
         peak_times = peaks / sr
         deltas = np.diff(peak_times)
         mid_times = (peak_times[:-1] + peak_times[1:]) / 2
