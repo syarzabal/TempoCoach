@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 class PantallaAnalisisDirecto(tk.Frame):
-    DURACION_CHUNK = 4  # en segundos
+    DURACION_CHUNK = 3  # en segundos
     SAMPLE_RATE = 44100 # Hz (samples/seg)
 
     def __init__(self, parent_widget, controller):
