@@ -24,7 +24,7 @@ class PantallaAnalisisDirecto(tk.Frame):
         plt.style.use('dark_background')
         self.tempos = []
         self.tiempos = []
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = plt.subplots(figsize=(6, 4))
         self.linea, = self.ax.plot([], [], 'o-', color='blue', lw=3)
         self.tiempo_total = 0  # acumulador de tiempo en segundos
         self.selected_device = None
@@ -39,11 +39,13 @@ class PantallaAnalisisDirecto(tk.Frame):
         btn_select_mic = tk.Button(self, text="Seleccionar micrófono", command=self.seleccionar_microfono)
         btn_select_mic.pack(pady=10)
 
+
+
         self.label_current_tempo = ttk.Label(self, text="0 BPM", font=("Segoe UI", 25))
         self.label_current_tempo.pack(pady=15)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=5)
+        self.canvas.get_tk_widget().pack(fill="x", expand=False, padx=10, pady=(5, 10))
 
         self.ax.set_title("Tempo en tiempo real")
         self.ax.set_xlabel("Tiempo (s)")
@@ -57,6 +59,8 @@ class PantallaAnalisisDirecto(tk.Frame):
 
         self.btn_grabar = ttk.Button(self, text="Grabar", command=self._toggle_worker)
         self.btn_grabar.pack(pady=5)
+
+
 
 
     def seleccionar_microfono(self):

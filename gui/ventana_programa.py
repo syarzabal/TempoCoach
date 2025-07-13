@@ -16,7 +16,8 @@ class VentanaPrograma(tb.Window):
     def __init__(self):
         super().__init__(themename="cyborg") #litera #darkly #cyborg
         self.title("Tempo Coach")
-        self.geometry("1400x800")
+        self.geometry("1600x800")
+        self.state("zoomed")
 
         # Dentro de __init__ de VentanaPrograma
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
