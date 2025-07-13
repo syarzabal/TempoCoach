@@ -10,6 +10,6 @@ class AnalizadorChunks:
         if audio_chunk is None or len(audio_chunk) == 0:
             raise ValueError('Audio chunk vacío')
 
-        tempo = librosa.feature.tempo(y=audio_chunk, sr=sample_rate)
+        tempo = librosa.beat.tempo(y=audio_chunk, sr=sample_rate)
 
         return float(tempo[0])

@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-from numba.core.types import Boolean
-
 from backend.analisis_en_vivo.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
 import threading
