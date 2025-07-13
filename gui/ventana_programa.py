@@ -3,6 +3,7 @@ from ttkbootstrap.constants import *
 from gui.pantalla_inicio import PantallaInicio
 from gui.pantalla_analisis_en_directo import PantallaAnalisisDirecto
 from gui.pantalla_analisis_archivo import PantallaAnalisisArchivo
+import sys
 
 # Lista de pantallas (clase, "nombre")
 pantallas = [
@@ -17,6 +18,11 @@ class VentanaPrograma(tb.Window):
         self.title("Tempo Coach")
         self.geometry("1400x800")
 
+        # Dentro de __init__ de VentanaPrograma
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+
+
         self.frame_container = tb.Frame(self)
         self.frame_container.pack(side="top", fill="both", expand=True)
 
@@ -30,6 +36,10 @@ class VentanaPrograma(tb.Window):
             frame.place(in_=self.frame_container, x=0, y=0, relwidth=1, relheight=1)
 
         self.mostrar_pantalla("PantallaInicio")
+
+    def on_closing(self):
+        self.destroy()
+        sys.exit()
 
     def mostrar_pantalla(self, pantalla):
         frame = self.frames[pantalla]

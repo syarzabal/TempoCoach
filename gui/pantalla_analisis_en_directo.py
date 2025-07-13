@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import simpledialog, messagebox
 
 from backend.analisis_en_vivo.analizador_chunks import AnalizadorChunks
 import sounddevice as sd
@@ -26,6 +27,7 @@ class PantallaAnalisisDirecto(tk.Frame):
         self.fig, self.ax = plt.subplots()
         self.linea, = self.ax.plot([], [], 'o-', color='blue', lw=3)
         self.tiempo_total = 0  # acumulador de tiempo en segundos
+        self.selected_device = None
 
         self._crear_widgets()
 
@@ -33,6 +35,9 @@ class PantallaAnalisisDirecto(tk.Frame):
         ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
 
         ttk.Label(self, text="Calcular tempo en directo", font=("Segoe UI", 16)).pack(pady=15)
+
+        btn_select_mic = tk.Button(self, text="Seleccionar micrófono", command=self.seleccionar_microfono)
+        btn_select_mic.pack(pady=10)
 
         self.label_current_tempo = ttk.Label(self, text="0 BPM", font=("Segoe UI", 25))
         self.label_current_tempo.pack(pady=15)
@@ -54,9 +59,26 @@ class PantallaAnalisisDirecto(tk.Frame):
         self.btn_grabar.pack(pady=5)
 
 
+    def seleccionar_microfono(self):
+        devices = sd.query_devices()
+        input_devices = [(i, d['name']) for i, d in enumerate(devices) if d['max_input_channels'] > 0]
+        if not input_devices:
+            messagebox.showerror("Error", "No se encontraron micrófonos.")
+            return
+
+        # Muestra un popup para seleccionar el micrófono
+        opciones = [f"{i}: {name}" for i, name in input_devices]
+        seleccion = simpledialog.askstring("Seleccionar micrófono", "Elige el número de micrófono:\n" + "\n".join(opciones))
+        if seleccion is not None and seleccion.isdigit():
+            idx = int(seleccion)
+            if any(i == idx for i, _ in input_devices):
+                self.selected_device = idx
+                messagebox.showinfo("Micrófono seleccionado", f"Usando dispositivo: {devices[idx]['name']}")
+            else:
+                messagebox.showerror("Error", "Índice no válido.")
+
     def _toggle_worker(self):
         self.running = not self.running
-        self.btn_grabar.config(text="Detener" if self.running else "Grabar")
 
         if self.running:
             threading.Thread(target=self._procesar_audio_loop, daemon=True).start()
@@ -64,14 +86,17 @@ class PantallaAnalisisDirecto(tk.Frame):
             self._actualizar_label_status("Status: deteniendo...")
 
     def _actualizar_label_status(self, texto):
-        self.label_status.after(0, lambda: self.label_status.config(text=texto))
+        if self.winfo_exists():
+            self.label_status.after(0, lambda: self.label_status.config(text=texto))
 
     def _grabar_audio(self):
+        device = self.selected_device if self.selected_device is not None else None
         self._actualizar_label_status("Status: grabando...")
         audio = sd.rec(int(self.DURACION_CHUNK * self.SAMPLE_RATE),
                        samplerate=self.SAMPLE_RATE,
                        channels=1,
-                       dtype='float32')
+                       dtype='float32',
+                       device=self.selected_device if hasattr(self, "selected_device") else None)
         sd.wait()
         return audio.flatten()
 
