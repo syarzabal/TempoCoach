@@ -32,7 +32,7 @@ class ControladorAnalisis:
 
         # Generar y guardar los gráficos
         figuras = {
-            "audio": self.plotter.plot_audio(y=y, sr=sr),
+            # "audio": self.plotter.plot_audio(y=y, sr=sr),
             "dtempo" :      self.plotter.plot_dynamic_tempo(dynamic_tempo=dtempo),
             "stability_pie" :       self.plotter.plot_tempo_stability_pie(stats=stats),
             "rw_beats" :    self.plotter.plot_rw_beats(y=y, sr=sr, beats=beats)

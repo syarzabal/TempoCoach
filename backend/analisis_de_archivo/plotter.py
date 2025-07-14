@@ -123,11 +123,11 @@ class Plotter:
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(tiempo_y, y, label='Amplitud', lw=1)
         ax.plot(peak_times, y[peaks], 'x', color='orange', label='Picos')
-        ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', label='Picos', lw=0.2)
+        ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', lw=0.2)
 
-        plt.axhline(1, color='green', linestyle='--', linewidth=1, label='Upper limit')
-        plt.axhline(-1, color='green', linestyle='--', linewidth=1, label='Lower limit')
-        plt.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Threshold')
+        plt.axhline(1, color='green', linestyle='--', linewidth=1, label='Limite superior')
+        plt.axhline(-1, color='green', linestyle='--', linewidth=1, label='Limite inferior')
+        plt.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Umbral')
 
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel("Amplitud")
@@ -146,10 +146,10 @@ class Plotter:
         fig, ax = plt.subplots(figsize=(15, 5))
         ax.plot(tiempo_y, y, label='Amplitud', lw=2)
         ax.plot(peak_times, y[peaks], 'x', color='orange', label='Picos')
-        ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', lw=0.2, label='Picos')
-        ax.axhline(1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Upper limit')
-        ax.axhline(-1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Lower limit')
-        ax.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Threshold')
+        ax.vlines(peak_times, ymin=-1, ymax=1, color='orange', lw=0.2)
+        ax.axhline(1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Limite superior')
+        ax.axhline(-1, color='green', linestyle='--', linewidth=3, alpha=0.8, label='Limite inferior')
+        ax.axhline(height, color='yellow', linestyle='-', linewidth=1, label='Umbral')
 
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel("Amplitud")
@@ -258,7 +258,7 @@ class Plotter:
 
         ax.set_xlabel("Picos (n)")
         ax.set_ylabel("Diferencia de tiempo (s)")
-        ax.set_title(f"Diferencias de tiempo entre picos de audio a tempo {tempo_bpm[0]:.2f} BPM")
+        ax.set_title(f"Diferencias de tiempo entre picos de audio a tempo {tempo_bpm:.2f} BPM")
         ax.grid(True)
         fig.tight_layout()
 

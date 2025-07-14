@@ -14,26 +14,33 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.controller = controller
         self.archivo_seleccionado = None
 
-        self.__crear_widgets()
         self.__crear_canvas_scrollable()
+        self.__crear_widgets()
+
 
 
     def __crear_widgets(self):
+        # Fuera de scroll frame
         ttk.Button(self, text="⬅", command=lambda: self.controller.mostrar_pantalla("PantallaInicio")).place(x=5, y=5)
-        ttk.Label(self, text="Analizar desde archivo", font=("Segoe UI", 16)).pack(pady=20)
-        ttk.Label(self, text="Para resultados más precisos se recomienda usar archivos .wav", foreground="gray").pack(pady=5)
 
-        self.btn_elegir_archivo = ttk.Button(self, text="Seleccionar archivo", command=lambda: self._seleccionar_archivo())
+        # Dentro de scroll frame
+        ttk.Label(self.scroll_frame, text="Analizar desde archivo", font=("Segoe UI", 16)).pack(pady=20)
+        ttk.Label(self.scroll_frame, text="Para resultados más precisos se recomienda usar archivos .wav", foreground="gray").pack(pady=5)
+
+        self.btn_elegir_archivo = ttk.Button(self.scroll_frame, text="Seleccionar archivo", command=lambda: self._seleccionar_archivo())
         self.btn_elegir_archivo.pack(pady=5)
 
-        self.label_archivo_seleccionado = ttk.Label(self, text="")
+        self.label_archivo_seleccionado = ttk.Label(self.scroll_frame, text="")
         self.label_archivo_seleccionado.pack(pady=5)
 
-        self.btn_analizar = ttk.Button(self, text="Analizar archivo", command=self._analizar_archivo)
+        self.btn_analizar = ttk.Button(self.scroll_frame, text="Analizar archivo", command=self._analizar_archivo)
         self.btn_analizar.pack(pady=5)
         self.btn_analizar.config(state="disabled")
 
         self.controlador_analisis = None
+
+        self.frame_resultados = tk.Frame(self.scroll_frame)
+        self.frame_resultados.pack(fill="x")
 
 
     def __crear_canvas_scrollable(self):
@@ -82,6 +89,11 @@ class PantallaAnalisisArchivo(tk.Frame):
             if hasattr(self, "canvas_widget_audio") and self.canvas_widget_audio.winfo_exists():
                 self.canvas_widget_audio.destroy()
 
+            # Eliminar resultados anteriores
+            self.frame_resultados.destroy()
+            self.frame_resultados = tk.Frame(self.scroll_frame)
+            self.frame_resultados.pack(fill="x")
+
             figura_audio = self.controlador_analisis.generar_plot_audio()
             fig = figura_audio["audio"]
             canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
@@ -93,8 +105,6 @@ class PantallaAnalisisArchivo(tk.Frame):
 
 
 
-
-    # TODO: añadir visualización de tiempo de carga
     def _analizar_archivo(self):
         self.btn_analizar.config(state="disabled", text="Cargando...")
 
@@ -102,29 +112,30 @@ class PantallaAnalisisArchivo(tk.Frame):
         self.figuras_basicas = self.controlador_analisis.generar_figuras_basicas()
         print("Plots generados")
 
-        # Limpiar contenido anterior
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+        # Eliminar resultados anteriores
+        self.frame_resultados.destroy()
+        self.frame_resultados = tk.Frame(self.scroll_frame)
+        self.frame_resultados.pack(fill="x")
 
         # Tempo y pulsos ------------------------
-        ttk.Label(self.scroll_frame, text="Tempo y pulsos", font=("Segoe UI", 35)).pack(pady=(50, 25))
+        ttk.Label(self.frame_resultados, text="Tempo y pulsos", font=("Segoe UI", 35)).pack(pady=(50, 25))
         for fig in self.figuras_basicas.values():
-            canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
+            canvas = FigureCanvasTkAgg(fig, master=self.frame_resultados)
             canvas.draw()
             canvas_widget = canvas.get_tk_widget()
             canvas_widget.pack(pady=(5, 15), anchor="center")
 
         # Picos de audio ----------------------
-        ttk.Label(self.scroll_frame, text="Picos de audio", font=("Segoe UI", 35)).pack(pady=(50, 25))
+        ttk.Label(self.frame_resultados, text="Picos de audio", font=("Segoe UI", 35)).pack(pady=(50, 25))
 
         # Caja de texto para umbral
-        ttk.Label(self.scroll_frame, text="Umbral (0.0 - 1.0):").pack()
-        self.entry_umbral = ttk.Entry(self.scroll_frame)
+        ttk.Label(self.frame_resultados, text="Umbral (0.0 - 1.0):").pack()
+        self.entry_umbral = ttk.Entry(self.frame_resultados)
         self.entry_umbral.insert(0, "0.5")  # Valor por defecto
         self.entry_umbral.pack(pady=(5, 10))
 
         #Boton de analisis de picos
-        self.btn_peaks = ttk.Button(self.scroll_frame, text="Analizar picos de audio",
+        self.btn_peaks = ttk.Button(self.frame_resultados, text="Analizar picos de audio",
                    command=lambda: self._analizar_peaks())
         self.btn_peaks.pack(pady=(50, 30), anchor="center")
 
@@ -143,7 +154,7 @@ class PantallaAnalisisArchivo(tk.Frame):
 
 
         for fig in self.figuras_peaks.values():
-            canvas = FigureCanvasTkAgg(fig, master=self.scroll_frame)
+            canvas = FigureCanvasTkAgg(fig, master=self.frame_resultados)
             canvas.draw()
             canvas_widget = canvas.get_tk_widget()
             canvas_widget.pack(pady=(5, 15), anchor="center")
