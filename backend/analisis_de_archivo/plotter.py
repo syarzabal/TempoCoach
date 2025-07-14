@@ -56,6 +56,8 @@ class Plotter:
         return fig
 
     def plot_tempo_stability_pie(self, stats):
+        import matplotlib.pyplot as plt
+
         labels = ['±5 BPM', '±10 BPM', '±15 BPM']
         sizes = [
             stats['percent_in_5'] * 100,
@@ -64,18 +66,21 @@ class Plotter:
         ]
         colors = ['green', 'gold', 'red']
 
-        fig, ax = plt.subplots(figsize=(5, 5))
-        ax.pie(
+        fig, ax = plt.subplots(figsize=(6, 6))
+        wedges, _ = ax.pie(
             sizes,
-            labels=labels,
             colors=colors,
-            autopct='%1.1f%%',
             startangle=90,
             wedgeprops={'edgecolor': 'black'}
         )
         ax.set_title('Distribución de estabilidad del tempo')
-        ax.axis('equal')  # Para que sea un círculo perfecto
+        ax.axis('equal')  # Para que sea circular
 
+        # Construir leyenda con porcentajes
+        legend_labels = [f"{label}: {size:.1f}%" for label, size in zip(labels, sizes)]
+        ax.legend(wedges, legend_labels, loc="center left", bbox_to_anchor=(1, 0.5))
+
+        fig.tight_layout()
         return fig
 
     def plot_rw_beats(self, beats, y, sr, hop_length=512):
@@ -204,7 +209,7 @@ class Plotter:
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel(" ")
         ax.set_yticks([])
-        ax.set_title("Línea temporal de picos detectados\nColoreados por figura musical estimada")
+        ax.set_title("Línea temporal de picos detectados\n(Intervalos coloreados por figura musical estimada)")
         ax.grid(True, axis='x')
         fig.tight_layout()
 
@@ -258,7 +263,8 @@ class Plotter:
 
         ax.set_xlabel("Picos (n)")
         ax.set_ylabel("Diferencia de tiempo (s)")
-        ax.set_title(f"Diferencias de tiempo entre picos de audio a tempo {tempo_bpm:.2f} BPM")
+        ax.set_title(f"Intervalos de tiempo entre picos de audio a tempo {tempo_bpm:.2f} BPM"
+                     f"\n(Coloreados por figura musical estimada)")
         ax.grid(True)
         fig.tight_layout()
 

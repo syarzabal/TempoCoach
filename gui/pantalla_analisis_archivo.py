@@ -141,6 +141,10 @@ class PantallaAnalisisArchivo(tk.Frame):
 
         self.btn_analizar.config(state="disabled", text="Analizar archivo")
 
+        # Frame contenedor para resultados de picos
+        self.frame_peaks = tk.Frame(self.frame_resultados)
+        self.frame_peaks.pack(fill="x")
+
     def _analizar_peaks(self):
         try:
             umbral = float(self.entry_umbral.get())
@@ -152,9 +156,16 @@ class PantallaAnalisisArchivo(tk.Frame):
 
         self.figuras_peaks = self.controlador_analisis.generar_figuras_peaks(height=umbral)
 
+        # Borrar resultados de picos anteriores
+        if hasattr(self, "frame_peaks") and self.frame_peaks.winfo_exists():
+            self.frame_peaks.destroy()
+
+        # Crear nuevo frame de resultados de picos
+        self.frame_peaks = tk.Frame(self.frame_resultados)
+        self.frame_peaks.pack(fill="x")
 
         for fig in self.figuras_peaks.values():
-            canvas = FigureCanvasTkAgg(fig, master=self.frame_resultados)
+            canvas = FigureCanvasTkAgg(fig, master=self.frame_peaks)
             canvas.draw()
             canvas_widget = canvas.get_tk_widget()
             canvas_widget.pack(pady=(5, 15), anchor="center")
