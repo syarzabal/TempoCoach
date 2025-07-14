@@ -160,27 +160,36 @@ class Plotter:
         fig.tight_layout()
         return fig
 
-    def plot_peaks_timeline(self, y, sr, peaks):
-        density_threshold = 8
-        bin_size = 0.06
+    def plot_peaks_timeline(self, y, sr, peaks, tempo_bpm):
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        tolerance = 0.05  # 5% de margen
+
+        # Figuras musicales en segundos
+        durations = {
+            "Negra": 60 / tempo_bpm,
+            "Corchea": 30 / tempo_bpm,
+            "Semicorchea": 15 / tempo_bpm,
+        }
 
         peak_times = peaks / sr
         deltas = np.diff(peak_times)
-        bin_edges = np.arange(0, max(deltas) + bin_size, bin_size)
-        hist, _ = np.histogram(deltas, bins=bin_edges)
-        dense_bins = bin_edges[:-1][hist >= density_threshold]
-
-        cmap = plt.colormaps.get_cmap('Set1')
-        color_map = {db: cmap(i % cmap.N) for i, db in enumerate(dense_bins)}
-
-        def get_zone_color(delta):
-            for db in dense_bins:
-                if db <= delta < db + bin_size:
-                    return color_map[db]
-            return (0.9, 0.9, 0.9, 0.2)
 
         fig, ax = plt.subplots(figsize=(15, 2))
+        cmap = plt.colormaps.get_cmap('Set1')
+        color_map = {name: cmap(i % cmap.N) for i, name in enumerate(durations)}
 
+        # Función para asignar color según figura musical
+        def get_zone_color(delta):
+            for name, base_duration in durations.items():
+                lower = base_duration * (1 - tolerance)
+                upper = base_duration * (1 + tolerance)
+                if lower <= delta <= upper:
+                    return color_map[name]
+            return (0.9, 0.9, 0.9, 0.2)  # Gris claro para valores fuera de rango
+
+        # Dibujar zonas entre picos
         for i in range(len(deltas)):
             x_start = peak_times[i]
             x_end = peak_times[i + 1]
@@ -188,52 +197,68 @@ class Plotter:
             color = get_zone_color(delta)
             ax.axvspan(x_start, x_end, color=color, alpha=0.3)
 
+        # Dibujar picos
         ax.eventplot(peak_times, orientation='horizontal', colors='orange', lineoffsets=1, linelengths=0.9)
         ax.axhline(y=1, color='black', linewidth=0.5, linestyle='-')
 
         ax.set_xlabel("Tiempo (s)")
         ax.set_ylabel(" ")
         ax.set_yticks([])
-        ax.set_title("Línea temporal de picos detectados\nCategorizados por intervalo")
+        ax.set_title("Línea temporal de picos detectados\nColoreados por figura musical estimada")
         ax.grid(True, axis='x')
         fig.tight_layout()
+
+        # Leyenda
+        from matplotlib.patches import Patch
+        legend_patches = [Patch(color=color_map[name], label=f"{name} ({round(durations[name], 3)}s)") for name in
+                          durations]
+        ax.legend(handles=legend_patches, loc='upper right')
+
         return fig
 
-    def plot_peak_intervals(self, peaks, sr):
-        density_threshold = 8
-        bin_size = 0.06
+    def plot_peak_intervals(self, peaks, sr, tempo_bpm):
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        tolerance = 0.05  # 5% de margen
+
+        # Figuras musicales en segundos
+        durations = {
+            "Negra": 60 / tempo_bpm,
+            "Corchea": 30 / tempo_bpm,
+            "Semicorchea": 15 / tempo_bpm,
+        }
 
         peak_times = peaks / sr
         deltas = np.diff(peak_times)
         mid_times = (peak_times[:-1] + peak_times[1:]) / 2
 
-        hist, bin_edges = np.histogram(deltas, bins=np.arange(0, max(deltas) + bin_size, bin_size))
-        dense_bins = bin_edges[:-1][hist >= density_threshold]
-
-        cmap = plt.colormaps.get_cmap('Set1')
-        color_map = {db: cmap(i % cmap.N) for i, db in enumerate(dense_bins)}
-
-        def get_zone_color(delta):
-            for db in dense_bins:
-                if db <= delta < db + bin_size:
-                    return color_map[db]
-            return (0.6, 0.6, 0.6)
-
         fig, ax = plt.subplots(figsize=(15, 5))
+        cmap = plt.colormaps.get_cmap('Set1')
+        color_map = {name: cmap(i % cmap.N) for i, name in enumerate(durations)}
 
-        for db in dense_bins:
-            color = color_map[db]
-            ax.axhspan(db, db + bin_size, color=color, alpha=0.2,
-                       label=f"Zona densa ({round(db, 2)}–{round(db + bin_size, 2)}s)")
+        # Dibujar zonas densas según figuras musicales
+        for i, (name, base_duration) in enumerate(durations.items()):
+            lower = base_duration * (1 - tolerance)
+            upper = base_duration * (1 + tolerance)
+            ax.axhspan(lower, upper, color=color_map[name], alpha=0.2, label=f"{name} ({round(base_duration, 3)}s)")
 
-        ax.plot(mid_times, deltas, linestyle='-', color='orange', linewidth=1, zorder=1)
+        # Función para asignar color según duración
+        def get_zone_color(delta):
+            for name, base_duration in durations.items():
+                lower = base_duration * (1 - tolerance)
+                upper = base_duration * (1 + tolerance)
+                if lower <= delta <= upper:
+                    return color_map[name]
+            return (0.6, 0.6, 0.6)  # Gris para el resto
 
+        # Dibujar puntos
         for i in range(len(deltas)):
             ax.plot(mid_times[i], deltas[i], marker='o', linestyle='None', color=get_zone_color(deltas[i]))
 
-        ax.set_xlabel("Tiempo medio entre picos (s)")
+        ax.set_xlabel("Picos (n)")
         ax.set_ylabel("Diferencia de tiempo (s)")
-        ax.set_title("Diferencias de tiempo entre picos")
+        ax.set_title(f"Diferencias de tiempo entre picos de audio a tempo {tempo_bpm[0]:.2f} BPM")
         ax.grid(True)
         fig.tight_layout()
 
@@ -241,3 +266,4 @@ class Plotter:
         by_label = dict(zip(labels, handles))
         ax.legend(by_label.values(), by_label.keys())
         return fig
+

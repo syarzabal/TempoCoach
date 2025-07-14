@@ -52,8 +52,8 @@ class ControladorAnalisis:
         figuras = {
             "peaks" :       self.plotter.plot_peaks(y=y, sr=sr, peaks=peaks, height=height),
             "peaks_closeup" : self.plotter.plot_peaks_closeup(y=y, sr=sr, peaks=peaks, height=height),
-            "peaks_timeline" : self.plotter.plot_peaks_timeline(y=y, sr=sr, peaks=peaks),
-            "peak_spacing": self.plotter.plot_peak_intervals(peaks=peaks, sr=sr)
+            "peaks_timeline" : self.plotter.plot_peaks_timeline(y=y, sr=sr, peaks=peaks, tempo_bpm=stempo),
+            "peak_spacing": self.plotter.plot_peak_intervals(peaks=peaks, sr=sr, tempo_bpm=stempo)
         }
 
         return figuras
